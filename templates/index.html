@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Words</title>
+    <style>
+        body,
+        h1,
+        ul,
+        li,
+        button,
+        div {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
+        ul li {
+            background-color: #1e1e1e;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        ul li strong {
+            color: #4caf50;
+            font-size: 1.1rem;
+        }
+
+        button {
+            display: block;
+            background-color: #4caf50;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #388e3c;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background-color: #2e7d32;
+            cursor: not-allowed;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4caf50;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Random Words</h1>
+    {% if error_message %}
+    <p style="color: red; text-align: center;">{{ error_message }}</p>
+    {% else %}
+    <ul id="word-list">
+        {% for word, definition in word_list %}
+        <li>
+            <strong>{{ word }}</strong>: {{ definition }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <button id="refresh-button">Generate New Crossword</button>
+    <div id="loading">Loading...</div>
+</body>
+
+<script>
+    const refreshButton = document.getElementById('refresh-button');
+    const loading = document.getElementById('loading');
+    const wordList = document.getElementById('word-list');
+
+    refreshButton.addEventListener('click', () => {
+        loading.style.display = 'block';
+        refreshButton.disabled = true;
+
+        fetch('/generate_new_crossword', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching new words:', err);
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+                refreshButton.disabled = false;
+            });
+    });
+</script>
+
+</html>
